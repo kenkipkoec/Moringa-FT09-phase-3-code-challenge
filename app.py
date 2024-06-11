@@ -70,14 +70,3 @@ if __name__ == "__main__":
     main()
 
 
-
-
-
-
-
-
-
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/kenkipkoec/project-3-kenna.git
-git push -u origin main
