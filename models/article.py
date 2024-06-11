@@ -1,4 +1,6 @@
 import sqlite3
+from models.author import Author
+from models.magazine import Magazine
 
 class Article:
     def __init__(self, author, magazine, title):
@@ -10,8 +12,15 @@ class Article:
     def _create_in_db(self):
         connection = sqlite3.connect('database.db')
         cursor = connection.cursor()
+        
+        cursor.execute('SELECT id FROM authors WHERE name = ?', (self.author.name,))
+        author_id = cursor.fetchone()[0]
+        cursor.execute('SELECT id FROM magazines WHERE name = ?', (self.magazine.name,))
+        magazine_id = cursor.fetchone()[0]
+        
+       
         cursor.execute('INSERT INTO articles (title, author_id, magazine_id) VALUES (?, ?, ?)', 
-                       (self.title, self.author.id, self.magazine.id))
+                       (self.title, author_id, magazine_id))
         connection.commit()
         connection.close()
 
@@ -30,6 +39,20 @@ class Article:
     def author(self):
         return self._author
 
+    @author.setter
+    def author(self, value):
+        if isinstance(value, Author):
+            self._author = value
+        else:
+            raise ValueError("Author must be an instance of Author")
+
     @property
     def magazine(self):
         return self._magazine
+
+    @magazine.setter
+    def magazine(self, value):
+        if isinstance(value, Magazine):
+            self._magazine = value
+        else:
+            raise ValueError("Magazine must be an instance of Magazine")

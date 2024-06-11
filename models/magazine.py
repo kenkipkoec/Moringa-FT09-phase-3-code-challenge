@@ -10,20 +10,12 @@ class Magazine:
     def _create_in_db(self):
         connection = sqlite3.connect('database.db')
         cursor = connection.cursor()
-        cursor.execute('INSERT INTO magazines (id, name, category) VALUES (?, ?, ?)', (self.id, self.name, self.category))
+        try:
+            cursor.execute('INSERT INTO magazines (id, name, category) VALUES (?, ?, ?)', (self.id, self.name, self.category))
+        except sqlite3.IntegrityError:
+            pass  
         connection.commit()
         connection.close()
-
-    @property
-    def id(self):
-        return self._id
-
-    @id.setter
-    def id(self, value):
-        if isinstance(value, int):
-            self._id = value
-        else:
-            raise ValueError("ID must be an integer")
 
     @property
     def name(self):
@@ -46,3 +38,41 @@ class Magazine:
             self._category = value
         else:
             raise ValueError("Category must be a non-empty string")
+
+    def articles(self):
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM articles WHERE magazine_id = ?', (self.id,))
+        articles = cursor.fetchall()
+        connection.close()
+        return articles
+
+    def contributors(self):
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('''
+        SELECT DISTINCT authors.* FROM authors
+        JOIN articles ON authors.id = articles.author_id
+        WHERE articles.magazine_id = ?
+        ''', (self.id,))
+        authors = cursor.fetchall()
+        connection.close()
+        return authors
+
+    def article_titles(self):
+        articles = self.articles()
+        return [article[1] for article in articles]
+
+    def contributing_authors(self):
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('''
+        SELECT authors.*, COUNT(articles.id) as article_count FROM authors
+        JOIN articles ON authors.id = articles.author_id
+        WHERE articles.magazine_id = ?
+        GROUP BY authors.id
+        HAVING article_count > 2
+        ''', (self.id,))
+        authors = cursor.fetchall()
+        connection.close()
+        return authors if authors else None

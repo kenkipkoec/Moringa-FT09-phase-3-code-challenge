@@ -13,7 +13,7 @@ def clear_database():
     connection.commit()
     connection.close()
 
-class TestModels(unittest.TestCase):
+class TestAuthor(unittest.TestCase):
     def setUp(self):
         clear_database()
 
@@ -21,18 +21,21 @@ class TestModels(unittest.TestCase):
         author = Author(1, 'John Doe')
         self.assertEqual(author.name, 'John Doe')
 
-    def test_article_creation(self):
+    def test_author_articles(self):
         author = Author(1, 'John Doe')
-        magazine = Magazine(1, 'Tech Weekly', 'Technology')
-        article = Article(author, magazine, 'Test Title')
-        self.assertEqual(article.title, 'Test Title')
-        self.assertEqual(article.author.name, 'John Doe')
-        self.assertEqual(article.magazine.name, 'Tech Weekly')
+        magazine = Magazine(1, 'Tech Monthly', 'Technology')
+        Article(author, magazine, 'The Rise of AI')
+        articles = author.articles()
+        self.assertEqual(len(articles), 1)
 
-    def test_magazine_creation(self):
-        magazine = Magazine(1, 'Tech Weekly', 'Technology')
-        self.assertEqual(magazine.name, 'Tech Weekly')
-        self.assertEqual(magazine.category, 'Technology')
+    def test_author_magazines(self):
+        author = Author(1, 'John Doe')
+        magazine1 = Magazine(1, 'Tech Monthly', 'Technology')
+        magazine2 = Magazine(2, 'Science Daily', 'Science')
+        Article(author, magazine1, 'The Rise of AI')
+        Article(author, magazine2, 'Genetic Engineering')
+        magazines = author.magazines()
+        self.assertEqual(len(magazines), 2)
 
 if __name__ == '__main__':
     unittest.main()
