@@ -46,3 +46,22 @@ class Author:
         magazines = cursor.fetchall()
         connection.close()
         return magazines
+
+    def save(self):
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        try:
+            cursor.execute('INSERT INTO authors (name) VALUES (?)', (self.name,))
+        except sqlite3.IntegrityError:
+            pass  
+        connection.commit()
+        connection.close()
+
+    @staticmethod
+    def get_all():
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM authors')
+        authors = cursor.fetchall()
+        connection.close()
+        return authors

@@ -2,7 +2,7 @@
 
 import sqlite3
 
-def setup_database():
+def create_tables():  # Change the function name to match the one you're importing
     connection = sqlite3.connect('database.db')
     cursor = connection.cursor()
 
@@ -36,4 +36,4 @@ def setup_database():
     connection.close()
 
 if __name__ == '__main__':
-    setup_database()
+    create_tables()

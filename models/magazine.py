@@ -1,7 +1,7 @@
 import sqlite3
 
 class Magazine:
-    def __init__(self, id, name, category):
+    def __init__(self, id=None, name=None, category=None):
         self.id = id
         self.name = name
         self.category = category
@@ -39,6 +39,13 @@ class Magazine:
         else:
             raise ValueError("Category must be a non-empty string")
 
+    def save(self):
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('INSERT INTO magazines (name, category) VALUES (?, ?)', (self.name, self.category))
+        connection.commit()
+        connection.close()
+
     def articles(self):
         connection = sqlite3.connect('database.db')
         cursor = connection.cursor()
@@ -51,9 +58,9 @@ class Magazine:
         connection = sqlite3.connect('database.db')
         cursor = connection.cursor()
         cursor.execute('''
-        SELECT DISTINCT authors.* FROM authors
-        JOIN articles ON authors.id = articles.author_id
-        WHERE articles.magazine_id = ?
+            SELECT DISTINCT authors.* FROM authors
+            JOIN articles ON authors.id = articles.author_id
+            WHERE articles.magazine_id = ?
         ''', (self.id,))
         authors = cursor.fetchall()
         connection.close()
@@ -67,12 +74,21 @@ class Magazine:
         connection = sqlite3.connect('database.db')
         cursor = connection.cursor()
         cursor.execute('''
-        SELECT authors.*, COUNT(articles.id) as article_count FROM authors
-        JOIN articles ON authors.id = articles.author_id
-        WHERE articles.magazine_id = ?
-        GROUP BY authors.id
-        HAVING article_count > 2
+            SELECT authors.*, COUNT(articles.id) as article_count FROM authors
+            JOIN articles ON authors.id = articles.author_id
+            WHERE articles.magazine_id = ?
+            GROUP BY authors.id
+            HAVING article_count > 2
         ''', (self.id,))
         authors = cursor.fetchall()
         connection.close()
         return authors if authors else None
+
+    @staticmethod
+    def get_all():
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM magazines')
+        magazines = cursor.fetchall()
+        connection.close()
+        return magazines

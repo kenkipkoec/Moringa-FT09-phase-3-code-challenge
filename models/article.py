@@ -18,7 +18,6 @@ class Article:
         cursor.execute('SELECT id FROM magazines WHERE name = ?', (self.magazine.name,))
         magazine_id = cursor.fetchone()[0]
         
-       
         cursor.execute('INSERT INTO articles (title, author_id, magazine_id) VALUES (?, ?, ?)', 
                        (self.title, author_id, magazine_id))
         connection.commit()
@@ -56,3 +55,24 @@ class Article:
             self._magazine = value
         else:
             raise ValueError("Magazine must be an instance of Magazine")
+
+    def save(self):
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT id FROM authors WHERE name = ?', (self.author.name,))
+        author_id = cursor.fetchone()[0]
+        cursor.execute('SELECT id FROM magazines WHERE name = ?', (self.magazine.name,))
+        magazine_id = cursor.fetchone()[0]
+        cursor.execute('INSERT INTO articles (title, author_id, magazine_id) VALUES (?, ?, ?)', 
+                       (self.title, author_id, magazine_id))
+        connection.commit()
+        connection.close()
+
+    @staticmethod
+    def get_all():
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM articles')
+        articles = cursor.fetchall()
+        connection.close()
+        return articles
